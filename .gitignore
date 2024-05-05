@@ -1,0 +1,6 @@
+# mac grabage
+.DS_Store
+
+/target
+
+.sych.html
