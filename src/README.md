@@ -16,8 +16,8 @@
 digraph {
     main -> cli
     cli -> indexer
-    indexer -> parser
-    parser -> rendering_engine
+    indexer -> transpiler
+    transpiler -> rendering_engine
     rendering_engine -> HTML
 }
 ```
