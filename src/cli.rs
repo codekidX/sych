@@ -141,11 +141,9 @@ fn index_markdown_files(
 
 fn save_html(sych_cfg: &SychConfig, doc_path: &PathBuf, docs_index: IndexedBlockMap) -> Result<()> {
     let mut reg = handlebars::Handlebars::new();
-    reg.register_template_string(SYCH_HBS_NAME, HBS_FILE)
-        .unwrap();
-    let html = reg
-        .render(SYCH_HBS_NAME, &Doc::generate(&sych_cfg, docs_index))
-        .unwrap();
+    reg.register_template_string(SYCH_HBS_NAME, HBS_FILE)?;
+
+    let html = reg.render(SYCH_HBS_NAME, &Doc::generate(&sych_cfg, docs_index))?;
     std::fs::write(doc_path, html).map_err(|e| anyhow::Error::from(e))
 }
 
