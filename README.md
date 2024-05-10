@@ -15,3 +15,9 @@ sych
 ### Goal
 
 The goal of sych is to save developer's time by keeping the documentation inside the project itself and to provide a `**[powerful and extensible]**` document generation engine.
+
+### Upcoming Features
+
+- [ ] Extensions
+- [ ] Themes
+- [ ] Search

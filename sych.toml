@@ -1,6 +1,7 @@
 refs = [
-    "./src/README.md",
-    "./README.md",
+    "./codebase.md",
+    "./theming.md",
+    "./extensions.md",
 ]
 
 [meta]
@@ -8,3 +9,6 @@ title = "sych"
 authors = ["codekidX"]
 version = "0.1.0"
 description = "sych generates docs from .md files in your project"
+
+[doc]
+root = "./docs"

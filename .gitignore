@@ -4,3 +4,8 @@
 /target
 
 .sych.html
+
+# --extensions--
+node_modules/
+# output of extenstions
+extensions/**/*.js

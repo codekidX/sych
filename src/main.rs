@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 mod cli;
@@ -23,10 +25,12 @@ struct SychConfig {
     pub meta: Meta,
     pub doc: Option<Doc>,
     pub refs: Option<Vec<String>>,
+    pub extensions: Option<HashMap<String, String>>,
 }
 
 fn main() {
-    if let Err(e) = cli::execute() {
+    let app = cli::SychCLI::load();
+    if let Err(e) = app.execute() {
         eprintln!("error: {}", e);
         std::process::exit(1);
     }

@@ -163,6 +163,9 @@
 
 
     <script type="module">
+        import SnoozeExt from "http://localhost:8000/snooze.js";
+        SnoozeExt.inject();
+
         import { Graphviz } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm/dist/graphviz.js";
         const graphviz = await Graphviz.load();
 
