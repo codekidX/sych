@@ -19,6 +19,10 @@ pub struct Doc {
     about: String,
     commands: Vec<(String, String)>,
     authors: Vec<String>,
+    extensions: HashMap<String, String>,
+    // FIXME: we need to make it a struct
+    /// extension_name, container, data
+    render_targets: Vec<(String, String, String)>,
 }
 
 fn get_hashed_id<T: Hash>(obj: T) -> u64 {
@@ -60,12 +64,21 @@ fn spans_to_html(spans: &Vec<Span>) -> String {
     html
 }
 
-fn blocks_to_html(html: &mut String, script_content: &mut String, blocks: &Vec<Block>, uid: usize) {
+// TODO: we need to pass sych config here to reduce param count
+fn blocks_to_html(
+    html: &mut String,
+    script_content: &mut String,
+    blocks: &Vec<Block>,
+    uid: usize,
+    extensions: &Option<HashMap<String, String>>,
+    // extension_name, container, data
+    render_targets: &mut Vec<(String, String, String)>,
+) {
     for (i, block) in blocks.iter().enumerate() {
         match block {
             Block::Blockquote(bq) => {
                 html.push_str(r#"<div class="bq">"#);
-                blocks_to_html(html, script_content, bq, uid);
+                blocks_to_html(html, script_content, bq, uid, extensions, render_targets);
                 html.push_str("</div>");
             }
             Block::Header(h, _) => {
@@ -83,6 +96,24 @@ fn blocks_to_html(html: &mut String, script_content: &mut String, blocks: &Vec<B
                 }
             }
             Block::CodeBlock(meta, cblock) => {
+                if let Some(m) = meta {
+                    if extensions.is_some() && extensions.as_ref().unwrap().contains_key(m) {
+                        let container =
+                            format!("{}-{}", m.clone(), get_hashed_id(cblock.to_owned()));
+                        render_targets.push((
+                            m.clone(),
+                            container.clone(),
+                            cblock.to_owned().replace("\n", ""),
+                        ));
+                        html.push_str(&format!(
+                            "<div style='margin: 1em' id='{}'></div>",
+                            container
+                        ));
+                    }
+                    continue;
+                }
+
+                // TODO: may be we can make this into extension as well
                 if meta.is_some() && meta.as_ref().unwrap().eq("dot") {
                     // uid_cblock is the combination of dot graph value
                     // and is sandwiched by -- with uid
@@ -113,7 +144,14 @@ fn blocks_to_html(html: &mut String, script_content: &mut String, blocks: &Vec<B
                         }
                         markdown::ListItem::Paragraph(p) => {
                             let mut list_para = String::from("<li>");
-                            blocks_to_html(&mut list_para, script_content, p, uid);
+                            blocks_to_html(
+                                &mut list_para,
+                                script_content,
+                                p,
+                                uid,
+                                extensions,
+                                render_targets,
+                            );
                             html.push_str(&list_para);
                             html.push_str("</li>");
                         }
@@ -130,7 +168,14 @@ fn blocks_to_html(html: &mut String, script_content: &mut String, blocks: &Vec<B
                         }
                         markdown::ListItem::Paragraph(p) => {
                             let mut list_para = String::from("<li>");
-                            blocks_to_html(&mut list_para, script_content, p, uid);
+                            blocks_to_html(
+                                &mut list_para,
+                                script_content,
+                                p,
+                                uid,
+                                extensions,
+                                render_targets,
+                            );
                             html.push_str(&list_para);
                             html.push_str("</li>");
                         }
@@ -153,9 +198,22 @@ fn append_dot_script_block(viz_element: &String, script_content: &mut String, cb
     script_content.push_str(&dot_block);
 }
 
-fn get_html(blocks: &Vec<Block>, script_content: &mut String, uid: usize) -> String {
+fn get_html(
+    blocks: &Vec<Block>,
+    script_content: &mut String,
+    uid: usize,
+    extenstions: &Option<HashMap<String, String>>,
+    render_targets: &mut Vec<(String, String, String)>,
+) -> String {
     let mut html = String::new();
-    blocks_to_html(&mut html, script_content, blocks, uid);
+    blocks_to_html(
+        &mut html,
+        script_content,
+        blocks,
+        uid,
+        extenstions,
+        render_targets,
+    );
     html
 }
 
@@ -173,7 +231,15 @@ impl Doc {
             about: value.meta.description.clone(),
             commands: vec![],
             authors: value.meta.authors.clone(),
+            extensions: if value.extensions.as_ref().is_none() {
+                HashMap::new()
+            } else {
+                value.extensions.as_ref().unwrap().clone()
+            },
+            render_targets: vec![],
         };
+
+        let mut render_targets = vec![];
 
         // here we create map of all sections/titles
         // (which is shown in the left side) of the documentation
@@ -192,7 +258,13 @@ impl Doc {
         // here we push contents of each section
         for (i, content) in docs.values().enumerate() {
             let mut script_chunk = String::new();
-            let html = get_html(content, &mut script_chunk, i);
+            let html = get_html(
+                content,
+                &mut script_chunk,
+                i,
+                &value.extensions,
+                &mut render_targets,
+            );
             doc.script_content.push_str(&script_chunk);
 
             // with corresponding:
@@ -210,6 +282,10 @@ impl Doc {
             );
             doc.contents.push(data);
         }
+
+        dbg!(&render_targets);
+
+        doc.render_targets = render_targets;
 
         doc
     }

@@ -12,3 +12,6 @@ description = "sych generates docs from .md files in your project"
 
 [doc]
 root = "./docs"
+
+[extensions]
+request = "http://localhost:8000/snooze.js"

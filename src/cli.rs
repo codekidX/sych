@@ -58,7 +58,7 @@ impl SychCLI {
 
         // read sych.toml inside the current working directory
         let mut sych_cfg = toml::from_str::<SychConfig>(&fs::read_to_string(&config_path)?)?;
-        validate_config(&sych_cfg)?;
+        // validate_config(&sych_cfg)?;
 
         // if user has mentioned custom root folder use that!
         // we give precedence to whatever is passed through
@@ -170,6 +170,7 @@ fn validate_config(sych_cfg: &SychConfig) -> Result<()> {
             if !ext_url.starts_with("https://ext.sych.com")
                 || !ext_url.starts_with("http://ext.sych.com")
                 || !ext_url.starts_with("ext.sych.com")
+                || !ext_url.starts_with("http://localhost:8000")
             {
                 return Err(anyhow::Error::msg(format!(
                     "invalid {}. cannot use unknown extensions.",

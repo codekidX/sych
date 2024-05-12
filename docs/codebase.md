@@ -4,6 +4,31 @@
 
 ### Knowing about the files
 
+```request
+{
+  "/pets": {
+    "get": {
+      "description": "Returns all pets from the system that the user has access to",
+      "responses": {
+        "200": {         
+          "description": "A list of pets.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/pet"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 - `main.rs` - executes the `cli::execute` function to start the sych process.
 - `cli.rs` - is the interface which the user interacts with
 - `indexer.rs` - indexer converts the markdown into sections where `##` becomes a section inside the doc and others become the child of this section.
