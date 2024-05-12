@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::Path, path::PathBuf};
 
 use anyhow::{Ok, Result};
 use indexmap::IndexMap;
@@ -33,6 +33,8 @@ pub struct SychCLI {
     pub root: Option<PathBuf>,
     #[structopt(short, long, help = "creates sych.toml in the current directory")]
     pub init: bool,
+    #[structopt(long, help = "don't open the docs in web browser, just rebuild")]
+    pub noopen: bool,
 }
 
 impl SychCLI {
@@ -93,29 +95,30 @@ impl SychCLI {
 
         // convert the absolute path to relative path for
         // expansion on other user's machine
-        update_references_in_cfg(&mut sych_cfg, &root, &config_path, &markdown_files)?;
-
+        if self.noopen {
+            return update_references_in_cfg(&mut sych_cfg, &root, &config_path, &markdown_files);
+        }
         // open file in default web browser
         return webbrowser::open_browser(webbrowser::Browser::Default, doc_path.to_str().unwrap())
-            .map_err(|e| anyhow::Error::from(e));
+            .map_err(anyhow::Error::from);
     }
 }
 
 fn update_references_in_cfg(
     sych_cfg: &mut SychConfig,
-    root: &PathBuf,
+    root: &Path,
     config_path: &PathBuf,
     markdown_files: &[String],
 ) -> Result<()> {
-    let root_path_str = root.as_path().to_str().unwrap();
+    let root_path_str = root.to_str().unwrap();
     sych_cfg.refs = Some(
         markdown_files
-            .into_iter()
-            .map(|f| f.replace(&root_path_str, "."))
+            .iter()
+            .map(|f| f.replace(root_path_str, "."))
             .collect(),
     );
     let updated_sych_cfg = toml::to_string_pretty(&sych_cfg)?;
-    std::fs::write(config_path, updated_sych_cfg).map_err(|e| anyhow::Error::from(e))
+    std::fs::write(config_path, updated_sych_cfg).map_err(anyhow::Error::from)
 }
 
 fn index_markdown_files(
@@ -151,20 +154,20 @@ fn save_html(sych_cfg: &SychConfig, doc_path: &PathBuf, docs_index: IndexedBlock
     let mut reg = handlebars::Handlebars::new();
     reg.register_template_string(SYCH_HBS_NAME, HBS_FILE)?;
 
-    let html = reg.render(SYCH_HBS_NAME, &Doc::generate(&sych_cfg, docs_index))?;
-    std::fs::write(doc_path, html).map_err(|e| anyhow::Error::from(e))
+    let html = reg.render(SYCH_HBS_NAME, &Doc::generate(sych_cfg, docs_index))?;
+    std::fs::write(doc_path, html).map_err(anyhow::Error::from)
 }
 
 fn initialize(cwd: &PathBuf) -> Result<()> {
-    std::fs::write(cwd, SYCH_INIT_DATA).map_err(|e| anyhow::Error::from(e))
+    std::fs::write(cwd, SYCH_INIT_DATA).map_err(anyhow::Error::from)
 }
 
 fn get_cwd() -> Result<PathBuf> {
-    std::env::current_dir().map_err(|e| anyhow::Error::from(e))
+    std::env::current_dir().map_err(anyhow::Error::from)
 }
 
 /// acts as a gatekeeper for verifying the extensions provided by the users
-fn validate_config(sych_cfg: &SychConfig) -> Result<()> {
+fn _validate_config(sych_cfg: &SychConfig) -> Result<()> {
     if let Some(extensions) = sych_cfg.extensions.as_ref() {
         for ext_url in extensions.values() {
             if !ext_url.starts_with("https://ext.sych.com")

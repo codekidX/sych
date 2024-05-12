@@ -68,7 +68,7 @@ fn spans_to_html(spans: &Vec<Span>) -> String {
 fn blocks_to_html(
     html: &mut String,
     script_content: &mut String,
-    blocks: &Vec<Block>,
+    blocks: &[Block],
     uid: usize,
     extensions: &Option<HashMap<String, String>>,
     // extension_name, container, data
@@ -103,7 +103,7 @@ fn blocks_to_html(
                         render_targets.push((
                             m.clone(),
                             container.clone(),
-                            cblock.to_owned().replace("\n", ""),
+                            cblock.to_owned().replace('\n', ""),
                         ));
                         html.push_str(&format!(
                             "<div style='margin: 1em' id='{}'></div>",
@@ -199,7 +199,7 @@ fn append_dot_script_block(viz_element: &String, script_content: &mut String, cb
 }
 
 fn get_html(
-    blocks: &Vec<Block>,
+    blocks: &[Block],
     script_content: &mut String,
     uid: usize,
     extenstions: &Option<HashMap<String, String>>,
@@ -282,8 +282,6 @@ impl Doc {
             );
             doc.contents.push(data);
         }
-
-        dbg!(&render_targets);
 
         doc.render_targets = render_targets;
 

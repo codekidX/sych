@@ -1,4 +1,3 @@
-use indexmap;
 use markdown::Block;
 
 pub(crate) fn create_index(
@@ -56,7 +55,7 @@ pub(crate) fn create_index(
                         match header {
                             markdown::Span::Text(t) => {
                                 doc_section = t.to_owned();
-                                docs_index.entry(t.to_owned()).or_insert(Vec::new());
+                                docs_index.entry(t.to_owned()).or_default();
                             }
                             _ => {
                                 return;
