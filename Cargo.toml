@@ -13,6 +13,7 @@ indexmap = "2.1.0"
 anyhow = "1.0.0"
 structopt = "0.3.26"
 rust_search = "2.1.0"
+minify-html = "0.15.0"
 
 serde = { version = "1.0.126", features = ["derive"] }
 toml = "0.8.12"

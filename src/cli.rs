@@ -31,10 +31,15 @@ pub struct SychCLI {
         value_name = "ROOT_FOLDER"
     )]
     pub root: Option<PathBuf>,
+
     #[structopt(short, long, help = "creates sych.toml in the current directory")]
     pub init: bool,
+
     #[structopt(long, help = "don't open the docs in web browser, just rebuild")]
     pub noopen: bool,
+
+    #[structopt(long, short, help = "generate a minified html for publishing")]
+    pub release: bool,
 }
 
 impl SychCLI {
@@ -91,7 +96,7 @@ impl SychCLI {
         // transpile markdown files into valid HTML
         // render and create .sych.html file
         let doc_path = root.join(SYCH_HTML);
-        save_html(&sych_cfg, &doc_path, docs_index)?;
+        save_html(&sych_cfg, &doc_path, docs_index, self.release)?;
 
         // convert the absolute path to relative path for
         // expansion on other user's machine
@@ -150,11 +155,25 @@ fn index_markdown_files(
     Ok(())
 }
 
-fn save_html(sych_cfg: &SychConfig, doc_path: &PathBuf, docs_index: IndexedBlockMap) -> Result<()> {
+fn save_html(
+    sych_cfg: &SychConfig,
+    doc_path: &PathBuf,
+    docs_index: IndexedBlockMap,
+    is_release: bool,
+) -> Result<()> {
     let mut reg = handlebars::Handlebars::new();
     reg.register_template_string(SYCH_HBS_NAME, HBS_FILE)?;
 
-    let html = reg.render(SYCH_HBS_NAME, &Doc::generate(sych_cfg, docs_index))?;
+    let mut html = reg.render(SYCH_HBS_NAME, &Doc::generate(sych_cfg, docs_index))?;
+    if is_release {
+        let mut cfg = minify_html::Cfg::spec_compliant();
+        cfg.minify_js = true;
+        cfg.minify_css = true;
+        let minified_bytes = minify_html::minify(html.as_bytes(), &cfg);
+        html = std::str::from_utf8(&minified_bytes)
+            .map_err(|e| anyhow::Error::msg(e.to_string()))?
+            .to_owned();
+    }
     std::fs::write(doc_path, html).map_err(anyhow::Error::from)
 }
 
