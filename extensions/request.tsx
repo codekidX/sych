@@ -121,7 +121,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
                   {...form.getInputProps(ff.name)}
                 />)}
 
-                <Group justify="flex-end">
+                <Group justify="flex-end" mt="md">
                   <Button type='submit'>Send</Button>
                 </Group>
               </form>

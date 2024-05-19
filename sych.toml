@@ -1,6 +1,7 @@
 refs = [
     "./codebase.md",
     "./theming.md",
+    "./ideas.md",
     "./extensions.md",
 ]
 

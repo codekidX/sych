@@ -14,7 +14,7 @@ If you want any initial data to be specified you can use the `${ext:name}-init` 
 
 Example:
 
-```
+```json
 snooze-init
 {
     "servers": [
