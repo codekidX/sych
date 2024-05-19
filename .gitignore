@@ -5,7 +5,9 @@
 
 .sych.html
 
-# --extensions--
 node_modules/
+
+# --extensions--
 # output of extenstions
 extensions/**/*.js
+extensions/**/*.css
