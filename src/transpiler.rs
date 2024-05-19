@@ -106,7 +106,7 @@ fn blocks_to_html(
                             cblock.to_owned().replace('\n', ""),
                         ));
                         html.push_str(&format!(
-                            "<div style='margin: 1em' id='{}'></div>",
+                            "<div style='margin: 1em' id='{}'>Loading...</div>",
                             container
                         ));
                     } else if m.eq("dot") {
@@ -123,7 +123,7 @@ fn blocks_to_html(
                         let viz_element = format!("viz-{}", get_hashed_id(uid_cblock));
 
                         // create a div with viz element id
-                        html.push_str(&format!("<div id='{}'></div>", viz_element));
+                        html.push_str(&format!("<div id='{}'>Loading...</div>", viz_element));
 
                         // add function call to load dot graph into the viz element on window load
                         append_dot_script_block(&viz_element, script_content, cblock);
