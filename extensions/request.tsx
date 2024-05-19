@@ -75,7 +75,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
     validate: validation
   });
 
-  const [selectedServer, setServer] = useState(pathItemObject?.servers?.at(0));
+  const [selectedServer, setServer] = useState(pathItemObject?.servers?.at(0)?.url);
 
 
   const startFetching = async (payload: any) => {
@@ -103,7 +103,8 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
 
             <div style={{ margin: '1em' }}>
               {pathItemObject?.servers?.length && <NativeSelect
-                value={selectedServer?.url}
+                onChange={(v) => setServer(v.target.value)}
+                value={selectedServer}
                 data={pathItemObject?.servers?.map(s => s.url)}
               />}
             </div>
