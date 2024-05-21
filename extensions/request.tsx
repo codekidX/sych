@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { type OpenAPIV3_1 } from 'openapi-types';
-import { Accordion, Button, Group, Input, MantineProvider, NativeSelect, Pill, TextInput } from "@mantine/core";
+import { Accordion, Button, Group, MantineProvider, NativeSelect, Pill, TextInput } from "@mantine/core";
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 
@@ -65,6 +65,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
         }
       }
       break;
+    // TODO: case "array":
     default:
       break;
   }
@@ -76,7 +77,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
   });
 
   const [selectedServer, setServer] = useState(pathItemObject?.servers?.at(0)?.url);
-
+  const [response, setResponse] = useState("");
 
   const startFetching = async (payload: any) => {
     switch (method) {
@@ -88,7 +89,19 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
           default:
             const params = new URLSearchParams();
             for (let key in payload) { params.set(key, payload[key]) }
-            fetch(`${selectedServer}${path}?${params.toString}`)
+            let res = await fetch(`${selectedServer}${path}?${params.toString}`);
+            if (!pathItemObject?.responses) {
+              // assume that response is a JSON one
+              res = await res.json();
+              let displayRes = JSON.stringify(res, null, 2);
+              setResponse(displayRes);
+              return;
+            }
+
+            res = await res.json();
+            let displayRes = JSON.stringify(res, null, 2);
+            setResponse(displayRes);
+          // let responseCodes = Object.keys(pathItemObject?.responses).map(r => Number(r));
         }
     }
   };
@@ -113,7 +126,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
             {pathItemObject?.description}
 
             <div style={{ padding: '1em' }}>
-              <form onSubmit={form.onSubmit(async (values) => { startFetching(values) })}>
+              <form onSubmit={form.onSubmit((values) => { startFetching(values) })}>
                 {formFields.map(ff => <TextInput
                   withAsterisk={ff.isRequired}
                   label={capitalize(ff.name)}
@@ -129,6 +142,9 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
             </div>
 
 
+            {response != "" ? <pre style={{ maxHeight: '200px', overflow: 'scroll' }}>
+              {response}
+            </pre> : <></>}
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
