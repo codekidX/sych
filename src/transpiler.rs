@@ -106,8 +106,9 @@ fn blocks_to_html(
                             cblock.to_owned().replace('\n', ""),
                         ));
                         html.push_str(&format!(
-                            "<div style='margin: 1em' id='{}'>Loading...</div>",
-                            container
+                            "<div style='margin: 1em' id='{}'>Loading extension {} ...</div>",
+                            container,
+                            m.clone()
                         ));
                     } else if m.eq("dot") {
                         // ^^ TODO: may be we can make this into extension as well
