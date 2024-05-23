@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { type OpenAPIV3_1 } from 'openapi-types';
-import { Accordion, Button, Group, MantineProvider, NativeSelect, Pill, TextInput } from "@mantine/core";
+import { Accordion, Button, Group, MantineProvider, NativeSelect, Pill, TextInput, type DefaultMantineColor } from "@mantine/core";
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 
@@ -15,25 +15,30 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
   const path = Object.keys(props.req)[0];
   const req = props.req[path]!;
   const method = Object.keys(req)[0];
-  let pathItemObject: OpenAPIV3_1.OperationObject | undefined;
+  let pathItemObject: OpenAPIV3_1.OperationObject;
+  let bgColor: DefaultMantineColor = 'teal';
   switch (method) {
     case "get":
       pathItemObject = req.get!;
       break;
     case "post":
+      bgColor = 'orange';
       pathItemObject = req.post!;
       break;
     case "put":
+      bgColor = 'green';
       pathItemObject = req.put!;
       break;
     case "delete":
+      bgColor = 'red';
       pathItemObject = req.delete!;
       break;
     case "patch":
+      bgColor = 'violet';
       pathItemObject = req.patch!;
       break;
     default:
-      break;
+      return <ErrorComponent msg='unknown HTTP method' />
   }
 
 
@@ -112,7 +117,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
       <Accordion variant='separated' radius='lg' defaultValue={'1'}>
         <Accordion.Item key={'1'} value='1'>
           <Accordion.Control>
-            <Pill>{method}</Pill> {path}
+            <Pill bg={bgColor} style={{ color: 'white' }} >{method}</Pill> <code>{path}</code>
 
             <div style={{ margin: '1em' }}>
               {pathItemObject?.servers?.length && <NativeSelect
