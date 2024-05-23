@@ -8,7 +8,33 @@ function capitalize(a: string): string {
   return a.charAt(0).toUpperCase() + a.slice(1);
 }
 
+interface FormObject {
+  name: string,
+  description: string | undefined,
+  type: string,
+  isRequired: boolean | undefined
+  in: string
+}
+
+function getParamFields(pathItem: OpenAPIV3_1.PathItemObject): FormObject[] {
+  let formFields: FormObject[] = [];
+  if (!pathItem.parameters) return formFields;
+
+  for (let param of pathItem.parameters as OpenAPIV3_1.ParameterObject[]) {
+    formFields.push({
+      name: param.name,
+      description: param.description,
+      type: 'string',
+      isRequired: param.required,
+      in: param.in
+    });
+  }
+
+  return formFields;
+}
+
 function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
+  const formFields: FormObject[] = [];
 
   // FIXME: ideally: we should not pick the first object and process it, we should
   // process all the keys inside the path object
@@ -41,6 +67,9 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
       return <ErrorComponent msg='unknown HTTP method' />
   }
 
+  // these are non-body inputs, like headers, params and query
+  const paramFields = getParamFields(pathItemObject);
+  formFields.push(...paramFields);
 
   let reqbody = pathItemObject?.requestBody as OpenAPIV3_1.RequestBodyObject;
 
@@ -51,7 +80,6 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
 
   const fields: any = {};
   const validation: any = {};
-  const formFields = [];
   switch (schema.type) {
     case "object":
       for (const prop of Object.keys(schema.properties as OpenAPIV3_1.SchemaObject)) {
@@ -62,6 +90,7 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
           description: schema.properties![prop]?.description, // TODO: proper null check here
           type: schema.type,
           isRequired: schema.required?.includes(prop),
+          in: 'body'
         };
         formFields.push(ff);
 
