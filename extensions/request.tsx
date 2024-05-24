@@ -16,21 +16,96 @@ interface FormObject {
   in: string
 }
 
-function getParamFields(pathItem: OpenAPIV3_1.PathItemObject): FormObject[] {
+/**
+ * gets parameters for an API like headers, path param or query
+ * 
+ * @param pathItem the main root object of the API
+ * @param fieldsRef received object by reference for storing default field values
+ * @param validationRef received object by reference for storing field validations
+ * @returns array of FieldObject
+ */
+function getParamFields(pathItem: OpenAPIV3_1.OperationObject, fieldsRef: any, validationRef: any): FormObject[] {
   let formFields: FormObject[] = [];
   if (!pathItem.parameters) return formFields;
 
   for (let param of pathItem.parameters as OpenAPIV3_1.ParameterObject[]) {
-    formFields.push({
+    fieldsRef[param.name] = ""
+    const ff = {
       name: param.name,
       description: param.description,
       type: 'string',
       isRequired: param.required,
       in: param.in
-    });
+    };
+    formFields.push(ff);
+
+    if (ff.isRequired) {
+      validationRef[ff.name] = (value: string) => value.length > 0 ? null : `${ff.name} is required`
+    }
   }
 
   return formFields;
+}
+
+
+/**
+ * gets request body of the API.
+ * 
+ *  ```FIXME: it should also return the media and media-type for use while making
+ * API request.```
+ * 
+ * @param pathItem the main root object of the API
+ * @param fieldsRef received object by reference for storing default field values
+ * @param validationRef received object by reference for storing field validations
+ * @returns array of FieldObject
+ */
+function getBodyFields(pathItem: OpenAPIV3_1.OperationObject, fieldsRef: any, validationRef: any): FormObject[] {
+  let formFields: FormObject[] = [];
+  if (!pathItem.requestBody) return formFields;
+
+
+  let reqbody = pathItem.requestBody as OpenAPIV3_1.RequestBodyObject;
+
+  // FIXME: here also there can be multiple media bodies
+  const mediakey = Object.keys(reqbody.content).at(0)!;
+  const media = reqbody.content[mediakey];
+  const schema = media.schema as OpenAPIV3_1.SchemaObject;
+
+  switch (schema.type) {
+    case "object":
+      for (const prop of Object.keys(schema.properties as OpenAPIV3_1.SchemaObject)) {
+        fieldsRef[prop] = '';
+
+        const ff = {
+          name: prop,
+          description: schema.properties![prop]?.description, // TODO: proper null check here
+          type: schema.type,
+          isRequired: schema.required?.includes(prop),
+          in: 'body'
+        };
+        formFields.push(ff);
+
+        if (ff.isRequired) {
+          validationRef[ff.name] = (value: string) => value.length > 0 ? null : `${ff.name} is required`
+        }
+      }
+      break;
+    // TODO: case "array":
+    default:
+      break;
+  }
+
+  return formFields;
+}
+
+function FormLabelComponent(props: { name: string, in: string, isRequired: boolean | undefined }) {
+  return (<p>
+    {props.name}
+    <span style={{ fontSize: '10px' }}>
+      <i>({props.in})</i>
+      {props.isRequired && <span style={{ color: 'red' }}>*</span>}
+    </span>
+  </p>)
 }
 
 function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
@@ -67,42 +142,14 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
       return <ErrorComponent msg='unknown HTTP method' />
   }
 
+  let fields = {},
+    validation = {};
   // these are non-body inputs, like headers, params and query
-  const paramFields = getParamFields(pathItemObject);
+  const paramFields = getParamFields(pathItemObject, fields, validation);
   formFields.push(...paramFields);
 
-  let reqbody = pathItemObject?.requestBody as OpenAPIV3_1.RequestBodyObject;
-
-  // FIXME: here also there can be multiple media bodies
-  const mediakey = Object.keys(reqbody.content).at(0)!;
-  const media = reqbody.content[mediakey];
-  const schema = media.schema as OpenAPIV3_1.SchemaObject;
-
-  const fields: any = {};
-  const validation: any = {};
-  switch (schema.type) {
-    case "object":
-      for (const prop of Object.keys(schema.properties as OpenAPIV3_1.SchemaObject)) {
-        fields[prop] = '';
-
-        const ff = {
-          name: prop,
-          description: schema.properties![prop]?.description, // TODO: proper null check here
-          type: schema.type,
-          isRequired: schema.required?.includes(prop),
-          in: 'body'
-        };
-        formFields.push(ff);
-
-        if (ff.isRequired) {
-          validation[ff.name] = (value: string) => value.length > 0 ? null : `${ff.name} is required`
-        }
-      }
-      break;
-    // TODO: case "array":
-    default:
-      break;
-  }
+  const bodyFields = getBodyFields(pathItemObject, fields, validation);
+  formFields.push(...bodyFields);
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -114,6 +161,8 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
   const [response, setResponse] = useState("");
 
   const startFetching = async (payload: any) => {
+    // TODO: remove this!!
+    let media = {};
     switch (method) {
       // TODO: support other methods
       case 'get':
@@ -162,8 +211,8 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
             <div style={{ padding: '1em' }}>
               <form onSubmit={form.onSubmit((values) => { startFetching(values) })}>
                 {formFields.map(ff => <TextInput
-                  withAsterisk={ff.isRequired}
-                  label={capitalize(ff.name)}
+                  // withAsterisk={ff.isRequired}
+                  label={<FormLabelComponent name={ff.name} in={ff.in} isRequired={ff.isRequired} />}
                   placeholder={ff.description}
                   key={form.key(ff.name)}
                   {...form.getInputProps(ff.name)}
