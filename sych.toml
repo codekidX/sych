@@ -16,3 +16,4 @@ root = "./docs"
 
 [extensions]
 request = "http://localhost:8000/snooze.js"
+tldraw = "http://localhost:8000/tldraw.js"
