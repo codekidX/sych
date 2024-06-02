@@ -6,9 +6,9 @@
 
 ```request
 {
-  "/pets": {
+  "/recipes": {
     "get": {
-      "servers": [{ "url": "http://bugramming.dev" }],
+      "servers": [{ "url": "https://dummyjson.com" }],
       "description": "Returns all pets from the system that the user has access to",
       "requestBody": {
         "content": {

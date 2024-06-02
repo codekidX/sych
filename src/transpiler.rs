@@ -278,9 +278,9 @@ impl Doc {
                 html,
                 index_idhash_map.get(&i).unwrap().to_owned(),
                 if i == 0 {
-                    "show active".into()
+                    "true".into()
                 } else {
-                    "".into()
+                    "false".into()
                 },
             );
             doc.contents.push(data);

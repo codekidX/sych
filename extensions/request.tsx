@@ -1,7 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { type OpenAPIV3_1 } from 'openapi-types';
-import { Accordion, Button, Group, MantineProvider, NativeSelect, Pill, TextInput, type DefaultMantineColor } from "@mantine/core";
-import { useForm } from '@mantine/form';
+import {
+  Accordion,
+  Badge,
+  Button,
+  Label,
+  Select,
+} from "flowbite-react";
 import { useState } from 'react';
 
 function capitalize(a: string): string {
@@ -117,25 +122,25 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
   const req = props.req[path]!;
   const method = Object.keys(req)[0];
   let pathItemObject: OpenAPIV3_1.OperationObject;
-  let bgColor: DefaultMantineColor = 'teal';
+  let bgColor = 'warning';
   switch (method) {
     case "get":
       pathItemObject = req.get!;
       break;
     case "post":
-      bgColor = 'orange';
+      bgColor = 'pink';
       pathItemObject = req.post!;
       break;
     case "put":
-      bgColor = 'green';
+      bgColor = 'success';
       pathItemObject = req.put!;
       break;
     case "delete":
-      bgColor = 'red';
+      bgColor = 'failure';
       pathItemObject = req.delete!;
       break;
     case "patch":
-      bgColor = 'violet';
+      bgColor = 'purple';
       pathItemObject = req.patch!;
       break;
     default:
@@ -151,11 +156,6 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
   const bodyFields = getBodyFields(pathItemObject, fields, validation);
   formFields.push(...bodyFields);
 
-  const form = useForm({
-    mode: 'uncontrolled',
-    initialValues: fields,
-    validate: validation
-  });
 
   const [selectedServer, setServer] = useState(pathItemObject?.servers?.at(0)?.url);
   const [response, setResponse] = useState("");
@@ -191,47 +191,40 @@ function RequestComponent(props: { req: OpenAPIV3_1.PathsObject }) {
 
   // TODO: hardcoded value of 1 accordian to be fixed
   return (
-    <MantineProvider>
-      <Accordion variant='separated' radius='lg' defaultValue={'1'}>
-        <Accordion.Item key={'1'} value='1'>
-          <Accordion.Control>
-            <Pill bg={bgColor} style={{ color: 'white' }} >{method}</Pill> <code>{path}</code>
-
-            <div style={{ margin: '1em' }}>
-              {pathItemObject?.servers?.length && <NativeSelect
-                onChange={(v) => setServer(v.target.value)}
-                value={selectedServer}
-                data={pathItemObject?.servers?.map(s => s.url)}
-              />}
+    <>
+      <Accordion collapseAll>
+        <Accordion.Panel>
+          <Accordion.Title>
+            <div className="flex flex-wrap gap-2">
+              <Badge color={bgColor}>{method}</Badge> <code>{path}</code>
             </div>
-          </Accordion.Control>
-          <Accordion.Panel>
+
+          </Accordion.Title>
+
+          <Accordion.Content>
+            <div className="max-w-md">
+              <div className="mb-2 block">
+              </div>
+              <Select id="servers" required>
+                {pathItemObject?.servers?.length && pathItemObject?.servers?.map(s => <option>{s.url}</option>)}
+              </Select>
+            </div>
+
             {pathItemObject?.description}
 
             <div style={{ padding: '1em' }}>
-              <form onSubmit={form.onSubmit((values) => { startFetching(values) })}>
-                {formFields.map(ff => <TextInput
-                  // withAsterisk={ff.isRequired}
-                  label={<FormLabelComponent name={ff.name} in={ff.in} isRequired={ff.isRequired} />}
-                  placeholder={ff.description}
-                  key={form.key(ff.name)}
-                  {...form.getInputProps(ff.name)}
-                />)}
 
-                <Group justify="flex-end" mt="md">
-                  <Button type='submit'>Send</Button>
-                </Group>
-              </form>
             </div>
 
 
             {response != "" ? <pre style={{ maxHeight: '200px', overflow: 'scroll' }}>
               {response}
             </pre> : <></>}
-          </Accordion.Panel>
-        </Accordion.Item>
+          </Accordion.Content>
+
+        </Accordion.Panel>
       </Accordion>
-    </MantineProvider>)
+    </>)
 }
 
 function ErrorComponent(props: { msg: string }) {
