@@ -15,5 +15,6 @@ description = "sych generates docs from .md files in your project"
 root = "./docs"
 
 [extensions]
-request = "http://localhost:8000/snooze.js"
-tldraw = "http://localhost:8000/tldraw.js"
+request = "http://localhost:8000/request/request.js"
+tldraw = "http://localhost:8000/tldraw/tldraw.js"
+graphviz = "http://localhost:8000/graphviz/graphviz.js"

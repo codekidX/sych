@@ -110,24 +110,6 @@ fn blocks_to_html(
                             container,
                             m.clone()
                         ));
-                    } else if m.eq("dot") {
-                        // ^^ TODO: may be we can make this into extension as well
-
-                        // uid_cblock is the combination of dot graph value
-                        // and is sandwiched by -- with uid
-                        // which is the position of this section
-                        let mut uid_cblock = cblock.to_owned();
-                        uid_cblock.push_str(&format!("--{}--", uid));
-
-                        // create a unique id from the uid_cblock for injecting
-                        // graphviz graph on page load
-                        let viz_element = format!("viz-{}", get_hashed_id(uid_cblock));
-
-                        // create a div with viz element id
-                        html.push_str(&format!("<div id='{}'>Loading...</div>", viz_element));
-
-                        // add function call to load dot graph into the viz element on window load
-                        append_dot_script_block(&viz_element, script_content, cblock);
                     } else {
                         // default case, it's just a pre block
                         html.push_str(&format!("<pre>{cblock}</pre>"));
@@ -189,16 +171,6 @@ fn blocks_to_html(
             _ => continue,
         }
     }
-}
-
-fn append_dot_script_block(viz_element: &String, script_content: &mut String, cblock: &str) {
-    let dot_block = format!(
-        r#"draw_into_element(`{}`, '{}');
-
-    "#,
-        cblock, viz_element
-    );
-    script_content.push_str(&dot_block);
 }
 
 fn get_html(

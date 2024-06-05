@@ -188,15 +188,6 @@
         {{/each}}
         
 
-        import { Graphviz } from "https://cdn.jsdelivr.net/npm/@hpcc-js/wasm/dist/graphviz.js";
-        const graphviz = await Graphviz.load();
-
-        function draw_into_element(dot, element_code) {
-            const svg = graphviz.dot(dot);
-            const div = document.getElementById(element_code);
-            div.innerHTML = graphviz.layout(dot, "svg", "dot");
-        }
-
         {{{script_content}}}
     </script>
 
