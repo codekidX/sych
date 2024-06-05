@@ -9,10 +9,6 @@ async function copyClipboard(drawData: string) {
 
 }
 
-// There's a guide at the bottom of this file!
-
-const PERSISTENCE_KEY = 'example-3'
-
 export default function DrawingComponent(props: { initialData: string }) {
     let drawingSnapshot = props.initialData;
     //[1]
@@ -130,80 +126,6 @@ export default function DrawingComponent(props: { initialData: string }) {
         </div>
     )
 }
-
-// function DrawingComponent(props: { containerKey: string, initialData: string }) {
-//     console.log(props);
-//     const [store] = useState(() => createTLStore({
-//         shapeUtils: defaultShapeUtils,
-//     }))
-//     let ed: Editor;
-//     let isReadOnly = true;
-
-//     if (props.initialData != "") {
-//         store.loadSnapshot(JSON.parse(props.initialData));
-//     }
-
-//     store.listen(
-//         throttle(() => {
-//             console.log(store.getSnapshot());
-//         }, 500)
-//     );
-
-
-//     const selectFn: TLUiMenuSelectFn = async () => {
-//         await copyClipboard(JSON.stringify(store.getSnapshot()));
-//         alert("copied data to clipboard. paste it inside your markdown file");
-//     };
-
-//     const selectToggleFn: TLUiMenuSelectFn = async () => {
-//         isReadOnly = !isReadOnly;
-//         ed.updateInstanceState({ isReadonly: isReadOnly })
-//     };
-
-//     const CustomMainMenu = function () {
-//         return (
-//             <DefaultMainMenu>
-//                 <div style={{ backgroundColor: 'thistle' }}>
-//                     <TldrawUiMenuGroup id="example">
-//                         <TldrawUiMenuItem
-//                             id="copy-drawing"
-//                             label="Copy Drawing"
-//                             icon="external-link"
-//                             readonlyOk
-//                             onSelect={selectFn}
-//                         />
-//                         <TldrawUiMenuItem
-//                             id="toggle-drawing"
-//                             label="Toggle Drawing"
-//                             icon="external-link"
-//                             readonlyOk
-//                             onSelect={selectToggleFn}
-//                         />
-//                     </TldrawUiMenuGroup>
-//                 </div>
-//                 <DefaultMainMenuContent />
-//             </DefaultMainMenu>
-//         )
-//     }
-
-//     const components: TLComponents = {
-//         MainMenu: CustomMainMenu
-//     }
-
-//     return (<div className="tldraw__editor" style={{ height: '500px' }}>
-//         <Tldraw
-//             components={components}
-//             // inferDarkMode
-//             // persistenceKey="example"
-//             onMount={(editor) => {
-//                 ed = editor;
-//                 // ed.current = editor;
-//                 ed.updateInstanceState({ isReadonly: true })
-//             }}
-//         />
-//     </div>)
-
-// }
 
 function render(container: HTMLElement, data: string) {
     const root = createRoot(container);
