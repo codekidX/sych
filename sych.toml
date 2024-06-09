@@ -1,9 +1,4 @@
-refs = [
-    "./codebase.md",
-    "./theming.md",
-    "./ideas.md",
-    "./extensions.md",
-]
+refs = ["./codebase.md", "./theming.md", "./ideas.md", "./extensions.md"]
 
 [meta]
 title = "sych"
@@ -14,7 +9,9 @@ description = "sych generates docs from .md files in your project"
 [doc]
 root = "./docs"
 
+[extensions.request]
+url = "http://localhost:8000/request/request.js"
+
 [extensions]
-request = "http://localhost:8000/request/request.js"
-tldraw = "http://localhost:8000/tldraw/tldraw.js"
-graphviz = "http://localhost:8000/graphviz/graphviz.js"
+tldraw = { url = "http://localhost:8000/tldraw/tldraw.js" }
+graphviz = { url = "http://localhost:8000/graphviz/graphviz.js" }

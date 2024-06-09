@@ -20,12 +20,18 @@ struct Meta {
     pub description: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct ExtensionMeta {
+    pub url: String,
+    pub opts: Option<HashMap<String, String>>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct SychConfig {
     pub meta: Meta,
     pub doc: Option<Doc>,
     pub refs: Option<Vec<String>>,
-    pub extensions: Option<HashMap<String, String>>,
+    pub extensions: Option<HashMap<String, ExtensionMeta>>,
 }
 
 fn main() {

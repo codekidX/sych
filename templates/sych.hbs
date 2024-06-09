@@ -189,11 +189,11 @@ style="z-index: 999;"
     <script type="module">
         {{!-- extension imports --}}
         {{#each extensions}}
-            import { render as render{{@key}} } from "{{this}}"
+            import { render as render{{@key}} } from "{{this.url}}"
         {{/each}}
         
 
-        {{!-- extenstion renders --}}
+        {{!-- extension renders --}}
         {{#each render_targets}}
             render{{this.0}}(document.getElementById("{{this.1}}"), `{{{this.2}}}`);
         {{/each}}

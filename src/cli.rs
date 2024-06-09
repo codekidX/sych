@@ -103,6 +103,7 @@ impl SychCLI {
         if self.noopen {
             return update_references_in_cfg(&mut sych_cfg, &root, &config_path, &markdown_files);
         }
+
         // open file in default web browser
         return webbrowser::open_browser(webbrowser::Browser::Default, doc_path.to_str().unwrap())
             .map_err(anyhow::Error::from);
@@ -188,15 +189,15 @@ fn get_cwd() -> Result<PathBuf> {
 /// acts as a gatekeeper for verifying the extensions provided by the users
 fn _validate_config(sych_cfg: &SychConfig) -> Result<()> {
     if let Some(extensions) = sych_cfg.extensions.as_ref() {
-        for ext_url in extensions.values() {
-            if !ext_url.starts_with("https://ext.sych.com")
-                || !ext_url.starts_with("http://ext.sych.com")
-                || !ext_url.starts_with("ext.sych.com")
-                || !ext_url.starts_with("http://localhost:8000")
+        for ext in extensions.values() {
+            if !ext.url.starts_with("https://ext.sych.com")
+                || !ext.url.starts_with("http://ext.sych.com")
+                || !ext.url.starts_with("ext.sych.com")
+                || !ext.url.starts_with("http://localhost:8000")
             {
                 return Err(anyhow::Error::msg(format!(
                     "invalid {}. cannot use unknown extensions.",
-                    ext_url
+                    ext.url
                 )));
             }
         }

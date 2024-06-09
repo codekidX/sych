@@ -6,6 +6,8 @@ use std::{
 use markdown::{Block, Span};
 use serde::Serialize;
 
+use crate::ExtensionMeta;
+
 use super::SychConfig;
 
 #[derive(Debug, Serialize)]
@@ -19,7 +21,7 @@ pub struct Doc {
     about: String,
     commands: Vec<(String, String)>,
     authors: Vec<String>,
-    extensions: HashMap<String, String>,
+    extensions: HashMap<String, ExtensionMeta>,
     // FIXME: we need to make it a struct
     /// extension_name, container, data
     render_targets: Vec<(String, String, String)>,
@@ -70,7 +72,7 @@ fn blocks_to_html(
     script_content: &mut String,
     blocks: &[Block],
     uid: usize,
-    extensions: &Option<HashMap<String, String>>,
+    extensions: &Option<HashMap<String, ExtensionMeta>>,
     // extension_name, container, data
     render_targets: &mut Vec<(String, String, String)>,
 ) {
@@ -177,7 +179,7 @@ fn get_html(
     blocks: &[Block],
     script_content: &mut String,
     uid: usize,
-    extenstions: &Option<HashMap<String, String>>,
+    extenstions: &Option<HashMap<String, ExtensionMeta>>,
     render_targets: &mut Vec<(String, String, String)>,
 ) -> String {
     let mut html = String::new();
