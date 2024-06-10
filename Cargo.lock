@@ -1385,7 +1385,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sych"
+name = "sych-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1399,6 +1399,10 @@ dependencies = [
  "toml",
  "webbrowser",
 ]
+
+[[package]]
+name = "sych-fan"
+version = "0.1.0"
 
 [[package]]
 name = "syn"

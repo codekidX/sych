@@ -1,0 +1,17 @@
+[package]
+name = "sych-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+markdown = "0.3.0"
+webbrowser = "1.0.0"
+handlebars = "5.1.2"
+indexmap = "2.1.0"
+anyhow = "1.0.0"
+structopt = "0.3.26"
+rust_search = "2.1.0"
+minify-html = "0.15.0"
+
+serde = { version = "1.0.126", features = ["derive"] }
+toml = "0.8.12"
